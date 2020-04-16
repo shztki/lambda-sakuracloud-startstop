@@ -41,3 +41,10 @@ resource "aws_iam_role_policy_attachment" "this" {
   role       = aws_iam_role.this.name
   policy_arn = aws_iam_policy.this.arn
 }
+
+resource "aws_kms_grant" "this" {
+  name              = module.label.id
+  key_id            = module.kms_key.key_id
+  grantee_principal = aws_iam_role.this.arn
+  operations        = ["Encrypt", "Decrypt", "GenerateDataKey"]
+}

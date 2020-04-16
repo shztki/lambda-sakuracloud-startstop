@@ -17,8 +17,17 @@ resource "aws_lambda_function" "this" {
   memory_size = 128
   timeout     = 300
 
+  kms_key_arn = module.kms_key.key_arn
+  environment {
+    variables = {
+      SAKURACLOUD_ACCESS_TOKEN        = var.sacloud_access_token
+      SAKURACLOUD_ACCESS_TOKEN_SECRET = var.sacloud_access_token_secret
+      SLACK_WEBHOOK_URL               = var.slack_webhook_url
+    }
+  }
+
   lifecycle {
-    ignore_changes = [source_code_hash]
+    ignore_changes = [source_code_hash, environment]
   }
 }
 

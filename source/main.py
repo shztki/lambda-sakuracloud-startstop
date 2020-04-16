@@ -5,13 +5,17 @@ import time
 import slack
 import json
 import requests
+import boto3
 
 from saklient.cloud.api import API
+from base64 import b64decode
 
 def lambda_handler(event, context):
 
-  token = os.environ['SAKURACLOUD_ACCESS_TOKEN']
-  secret = os.environ['SAKURACLOUD_ACCESS_TOKEN_SECRET']
+  #token = os.environ['SAKURACLOUD_ACCESS_TOKEN']
+  token = boto3.client('kms').decrypt(CiphertextBlob=b64decode(os.environ['SAKURACLOUD_ACCESS_TOKEN']))['Plaintext'].decode('utf-8')
+  #secret = os.environ['SAKURACLOUD_ACCESS_TOKEN_SECRET']
+  secret = boto3.client('kms').decrypt(CiphertextBlob=b64decode(os.environ['SAKURACLOUD_ACCESS_TOKEN_SECRET']))['Plaintext'].decode('utf-8')
   #zone = os.environ['SAKURACLOUD_ZONE']
   zones = ["is1a", "is1b", "tk1a"]
   target_tags = ["autostartstop"]
@@ -93,7 +97,8 @@ def lambda_handler(event, context):
   post_to_slack(json_data)
 
 def post_to_slack(message):
-  webhook_url = os.environ['SLACK_WEBHOOK_URL']
+  #webhook_url = os.environ['SLACK_WEBHOOK_URL']
+  webhook_url = boto3.client('kms').decrypt(CiphertextBlob=b64decode(os.environ['SLACK_WEBHOOK_URL']))['Plaintext'].decode('utf-8')
   slack_data = json.dumps({'blocks': message})
   response = requests.post(
       webhook_url, data=slack_data,

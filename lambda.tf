@@ -1,7 +1,35 @@
 data "archive_file" "this" {
-  type        = "zip"
-  source_file = "source/main.py"
+  type = "zip"
+  #source_file = "source/main.py"
+  source_dir  = "source/lib"
   output_path = "source/main.zip"
+}
+
+data "external" "sacloud_access_token" {
+  program = ["bash", "kms.sh"]
+
+  query = {
+    key_id    = module.kms_key.key_arn
+    plaintext = var.sacloud_access_token
+  }
+}
+
+data "external" "sacloud_access_token_secret" {
+  program = ["bash", "kms.sh"]
+
+  query = {
+    key_id    = module.kms_key.key_arn
+    plaintext = var.sacloud_access_token_secret
+  }
+}
+
+data "external" "slack_webhook_url" {
+  program = ["bash", "kms.sh"]
+
+  query = {
+    key_id    = module.kms_key.key_arn
+    plaintext = var.slack_webhook_url
+  }
 }
 
 resource "aws_lambda_function" "this" {
@@ -20,14 +48,17 @@ resource "aws_lambda_function" "this" {
   kms_key_arn = module.kms_key.key_arn
   environment {
     variables = {
-      SAKURACLOUD_ACCESS_TOKEN        = var.sacloud_access_token
-      SAKURACLOUD_ACCESS_TOKEN_SECRET = var.sacloud_access_token_secret
-      SLACK_WEBHOOK_URL               = var.slack_webhook_url
+      #SAKURACLOUD_ACCESS_TOKEN        = var.sacloud_access_token
+      #SAKURACLOUD_ACCESS_TOKEN_SECRET = var.sacloud_access_token_secret
+      #SLACK_WEBHOOK_URL               = var.slack_webhook_url
+      SAKURACLOUD_ACCESS_TOKEN        = data.external.sacloud_access_token.result["result"]
+      SAKURACLOUD_ACCESS_TOKEN_SECRET = data.external.sacloud_access_token_secret.result["result"]
+      SLACK_WEBHOOK_URL               = data.external.slack_webhook_url.result["result"]
     }
   }
 
   lifecycle {
-    ignore_changes = [source_code_hash, environment]
+    ignore_changes = [environment] # source_code_hash
   }
 }
 

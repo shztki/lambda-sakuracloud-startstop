@@ -98,7 +98,7 @@ def lambda_handler(event, context):
 
 def post_to_slack(message):
   #webhook_url = os.environ['SLACK_WEBHOOK_URL']
-  webhook_url = boto3.client('kms').decrypt(CiphertextBlob=b64decode(os.environ['SLACK_WEBHOOK_URL']))['Plaintext'].decode('utf-8')
+  webhook_url = "https://" + boto3.client('kms').decrypt(CiphertextBlob=b64decode(os.environ['SLACK_WEBHOOK_URL']))['Plaintext'].decode('utf-8')
   slack_data = json.dumps({'blocks': message})
   response = requests.post(
       webhook_url, data=slack_data,

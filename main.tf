@@ -19,7 +19,7 @@ module "kms_key" {
   stage                   = var.label["stage"]
   name                    = var.label["name"]
   description             = format("%s%s", "KMS key for ", var.label["namespace"])
-  deletion_window_in_days = 10
-  enable_key_rotation     = true
+  deletion_window_in_days = 7
+  enable_key_rotation     = false
   alias                   = format("%s%s", "alias/", module.label.id)
 }

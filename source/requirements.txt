@@ -1,3 +1,0 @@
-requests==2.23.0
-saklient==0.0.6
-slack==0.0.2
